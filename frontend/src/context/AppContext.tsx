@@ -30,6 +30,8 @@ const DEFAULT_PROFILE: ShopProfile = {
 interface AppContextType {
   profile: ShopProfile;
   updateProfile: (data: Partial<ShopProfile>) => void;
+  activeQrCategory: string;
+  setActiveQrCategory: (cat: string) => void;
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   coffeeModalOpen: boolean;
@@ -40,6 +42,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [profile, setProfile] = useState<ShopProfile>(DEFAULT_PROFILE);
+  const [activeQrCategory, setActiveQrCategoryState] = useState<string>('vietqr');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [coffeeModalOpen, setCoffeeModalOpen] = useState(false);
 
@@ -49,10 +52,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (saved) {
         setProfile(prev => ({ ...prev, ...JSON.parse(saved) }));
       }
+      const savedCat = localStorage.getItem('tiemso_active_qr_category');
+      if (savedCat) {
+        setActiveQrCategoryState(savedCat);
+      }
     } catch (e) {
       console.error(e);
     }
   }, []);
+
+  const setActiveQrCategory = (cat: string) => {
+    setActiveQrCategoryState(cat);
+    try {
+      localStorage.setItem('tiemso_active_qr_category', cat);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const updateProfile = (data: Partial<ShopProfile>) => {
     setProfile(prev => {
@@ -75,6 +91,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       value={{
         profile,
         updateProfile,
+        activeQrCategory,
+        setActiveQrCategory,
         mobileMenuOpen,
         setMobileMenuOpen,
         coffeeModalOpen,
